@@ -24,6 +24,21 @@ export type BaileysEventMap = {
         progress?: number | null;
         syncType?: proto.HistorySync.HistorySyncType | null;
         peerDataRequestSessionId?: string | null;
+        statusMessages?: proto.IWebMessageInfo[];
+        pastParticipants?: proto.IPastParticipants[];
+        callLogRecords?: proto.ICallLogRecord[];
+        chunkOrder?: number | null;
+        messageAccessStatus?: proto.Message.IHistorySyncMessageAccessStatus | null;
+    };
+    /** respuesta del telefono a fetchFullHistory / requestHistorySyncChunkRetry */
+    'history-sync.response': {
+        type: 'full' | 'chunk-retry';
+        stanzaId?: string | null;
+        requestId?: string | null;
+        syncType?: number | null;
+        chunkOrder?: number | null;
+        responseCode?: number | null;
+        canRecover?: boolean | null;
     };
     /** upsert chats */
     'chats.upsert': Chat[];
