@@ -146,7 +146,16 @@ declare const makeWASocket: (config: UserFacingSocketConfig) => {
     count: number,
     oldestMsgKey: import("../index.js").WAMessageKey,
     oldestMsgTimestamp: number | import("long").default,
+    options?: { accountLid?: string; supportInlineResponse?: boolean },
   ) => Promise<string>;
+  fetchMessageHistoryAndWait: (
+    count: number,
+    oldestMsgKey: import("../index.js").WAMessageKey,
+    oldestMsgTimestamp: number | import("long").default,
+    options?: { accountLid?: string; supportInlineResponse?: boolean; timeoutMs?: number },
+  ) => Promise<any>;
+  fetchFullHistory: (options?: { historyFromTimestamp?: number; historyDurationDays?: number; requestId?: string; historySyncConfig?: any }) => Promise<string>;
+  requestHistorySyncChunkRetry: (syncType: number, chunkOrder: number, chunkNotificationId: string, regenerateChunk?: boolean) => Promise<string>;
   requestPlaceholderResend: (
     messageKey: import("../index.js").WAMessageKey,
     msgData?: Partial<import("../index.js").WAMessage>,
