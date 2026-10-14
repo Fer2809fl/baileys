@@ -3,11 +3,15 @@ import Long from 'long';
 import { proto } from '../../WAProto/index.js';
 import type { MessageReceiptType, MessageRelayOptions, SocketConfig, WAMessage, WAMessageKey } from '../Types/index.js';
 import { type BinaryNode } from '../WABinary/index.js';
+export type FetchHistoryOptions = { accountLid?: string; supportInlineResponse?: boolean };
 export declare const makeMessagesRecvSocket: (config: SocketConfig) => {
     sendMessageAck: (node: BinaryNode, errorCode?: number) => Promise<void>;
     sendRetryRequest: (node: BinaryNode, forceIncludeKeys?: boolean) => Promise<void>;
     rejectCall: (callId: string, callFrom: string) => Promise<void>;
-    fetchMessageHistory: (count: number, oldestMsgKey: WAMessageKey, oldestMsgTimestamp: number | Long) => Promise<string>;
+    fetchMessageHistory: (count: number, oldestMsgKey: WAMessageKey, oldestMsgTimestamp: number | Long, options?: FetchHistoryOptions) => Promise<string>;
+    fetchMessageHistoryAndWait: (count: number, oldestMsgKey: WAMessageKey, oldestMsgTimestamp: number | Long, options?: FetchHistoryOptions & { timeoutMs?: number }) => Promise<{ requestId: string; chats: any[]; contacts: any[]; messages: WAMessage[]; [k: string]: any }>;
+    fetchFullHistory: (options?: { historyFromTimestamp?: number | Long; historyDurationDays?: number; requestId?: string; historySyncConfig?: any }) => Promise<string>;
+    requestHistorySyncChunkRetry: (syncType: proto.Message.HistorySyncType, chunkOrder: number, chunkNotificationId: string, regenerateChunk?: boolean) => Promise<string>;
     requestPlaceholderResend: (messageKey: WAMessageKey, msgData?: Partial<WAMessage>) => Promise<string | undefined>;
     messageRetryManager: import("../Utils/index.js").MessageRetryManager | null;
     getPrivacyTokens: (jids: string[]) => Promise<any>;
