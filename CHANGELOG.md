@@ -1,3 +1,20 @@
+## Historial de mensajes (nuevo sistema)
+- `fetchMessageHistory(count, key, ts, { accountLid, supportInlineResponse })`: opciones nuevas + validacion de argumentos.
+- `fetchMessageHistoryAndWait(...)`: pide historial y espera la respuesta (`timeoutMs`, 30s por defecto).
+- `fetchFullHistory({ historyFromTimestamp, historyDurationDays })`: historial completo bajo demanda.
+- `requestHistorySyncChunkRetry(syncType, chunkOrder, chunkNotificationId, regenerate)`: reintenta chunks fallidos.
+- `messaging-history.set` ahora incluye `statusMessages`, `pastParticipants`, `callLogRecords`, `chunkOrder`, `messageAccessStatus`.
+- Nuevo evento `history-sync.response`: respuesta del telefono a `fetchFullHistory` y `requestHistorySyncChunkRetry` (`responseCode`, `canRecover`).
+- Se procesan `NON_BLOCKING_DATA` / `INITIAL_STATUS_V3` e `inlineContacts` (nombres + mapeo LID-PN).
+
+## Arreglos
+- `MessageQueue`: la huella anti-duplicados solo miraba los primeros bytes del JSON, asi que mensajes DISTINTOS al mismo chat se descartaban como duplicados; ahora usa sha1 completo y las tareas-funcion sin `contentHash` ya no se deduplican entre si.
+- `MessageQueue`: al llenarse la cola se reordenaba al reves (rompia el orden de prioridad); ahora solo se recorta lo de menor prioridad al final.
+- `EnhancedCache`: el archivo de persistencia crecia sin limite (mezclaba claves viejas) y se escribia sin proteccion; ahora guarda solo lo vivo (acotado por `MAX_SIZE`), de forma atomica y sin solapar guardados.
+- `ScheduledMessages`: una escritura sincrona por cambio -> una sola escritura agrupada (250 ms), compacta y atomica.
+- Temporizadores de anti-ban, health check, cola, cache y programados con `unref()`: ya no impiden que el proceso termine.
+- `fetchLatestBaileysVersion`: ya no depende de la linea 7 del archivo remoto; busca `const version = [...]` en todo el texto.
+
 # Changelog
 
 ## 7.0.7
