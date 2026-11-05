@@ -188,6 +188,10 @@ Paquete npm: [npmjs.com/package/@fer2809fl/baileys](https://www.npmjs.com/packag
 
 ---
 
+## Mantenimiento de seguridad y memoria
+
+La extracción de miniaturas de video usa argumentos separados para FFmpeg y valida los parámetros recibidos. La descarga del historial limita a 100 MB los datos descomprimidos para evitar consumos excesivos de memoria. SQLite valida las opciones de conexión, aplica un tiempo de espera para bloqueos y conserva las escrituras de claves dentro de una transacción.
+
 ## 🧪 Validar la distribución
 
 Este repositorio publica la distribución JavaScript ya preparada en `lib/` y sus declaraciones TypeScript (`.d.ts`); no incluye el árbol de fuentes `src/` ni `tsconfig.build.json`. Por eso `npm run build` valida la sintaxis de todos los archivos JavaScript distribuidos con la versión de Node instalada, en lugar de fingir una compilación TypeScript.
