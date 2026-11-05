@@ -170,8 +170,8 @@ yarn add @fer2809fl/baileys
 
 **Opción 2 — Desde GitHub directamente**
 ```bash
-npm install github:Fer2809fl/Bail
-yarn add github:Fer2809fl/Bail
+npm install github:Fer2809fl/baileys
+yarn add github:Fer2809fl/baileys
 ```
 
 **En tu package.json**
@@ -183,7 +183,7 @@ yarn add github:Fer2809fl/Bail
 }
 ```
 
-Repositorio: [github.com/Fer2809fl/Bail](https://github.com/Fer2809fl/baileys)
+Repositorio: [github.com/Fer2809fl/baileys](https://github.com/Fer2809fl/baileys)
 Paquete npm: [npmjs.com/package/@fer2809fl/baileys](https://www.npmjs.com/package/@fer2809fl/baileys)
 
 ---
