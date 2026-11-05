@@ -36,3 +36,4 @@ export * from "./banner.js";
 export * from "./rich-message-utils.js";
 export * from "./use-sqlite-auth-state.js";
 //# sourceMappingURL=index.d.ts.map
+export * from './external-ad-reply.js';
