@@ -1,26 +1,39 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/fernox/baileys/refs/heads/main/lib/Baileys.jpeg" alt="Baileys" width="500" style="border-radius: 20px;"/>
+<img src="https://raw.githubusercontent.com/Fer2809fl/Bail/refs/heads/main/lib/Baileys.jpeg" alt="Baileys" width="500" style="border-radius: 20px;"/>
 
 # Baileys
 ### API de WhatsApp Web para Node.js
 
-[![version](https://img.shields.io/badge/version-1.0.0-blueviolet)](https://github.com/fernox/baileys/releases)
+[![version](https://img.shields.io/badge/version-7.0.8-blueviolet)](https://github.com/Fer2809fl/Bail/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-supported-blue)](https://www.typescriptlang.org)
 
 *Conecta tus proyectos de Node.js con WhatsApp Web mediante una API flexible, sin Selenium.*
 
-**Versión actual: `1.0.0` · Mantenido por [Fernox](https://github.com/fernox)**
+**Versión actual: `7.0.8` · Mantenido por [Fer2809fl](https://github.com/Fer2809fl)**
 
 </div>
 
 ---
 
-## 🆕 Novedades — v1.0.0
+## 🆕 Novedades — v7.0.8
 
-**Botones con acción más seguros y más robustos.** La versión se mantiene en 1.0.0; esto es lo que cambió dentro de `lib/Socket/native-buttons.js`:
+**Historial de mensajes (nuevo sistema) y arreglos de estabilidad.** Detalle completo en el [CHANGELOG](CHANGELOG.md).
+
+- 📜 **Historial bajo demanda:** `fetchMessageHistoryAndWait`, `fetchFullHistory` y `requestHistorySyncChunkRetry` (ver [Historial de mensajes](#-historial-de-mensajes)).
+- 📡 **Evento nuevo** `history-sync.response` y `messaging-history.set` ahora trae `statusMessages`, `pastParticipants`, `callLogRecords`, `chunkOrder` y `messageAccessStatus`.
+- 🧰 **`MessageQueue`:** ya no descarta como "duplicados" mensajes distintos al mismo chat, y respeta el orden de prioridad cuando la cola se llena.
+- 💾 **`EnhancedCache` y `ScheduledMessages`:** escrituras atómicas, agrupadas y acotadas (el archivo de caché ya no crece sin límite).
+- ⏱️ Temporizadores internos con `unref()`: ya no impiden que el proceso termine.
+- 🔎 `fetchLatestBaileysVersion` ya no depende de la línea 7 del archivo remoto.
+
+---
+
+## 🆕 Novedades — v7.0.7
+
+**Botones con acción más seguros y más robustos.** Esto es lo que cambió dentro de `lib/Socket/native-buttons.js`:
 
 - 🔒 **Solo el dueño cancela su recordatorio.** Antes cualquiera en un grupo podía tocar "Cancelar recordatorio" de otra persona.
 - 🛡️ **Anti-spam:** cooldown de 1,5 s por usuario y botón (si lo machacan, solo cuenta el primer toque) y **máximo 20 recordatorios pendientes por usuario**.
@@ -34,14 +47,14 @@ Detalle completo en el [CHANGELOG](CHANGELOG.md).
 
 ---
 
-## 🆕 Novedades — v1.0.0
+## 🆕 Novedades anteriores
 
 **La actualización más completa hasta ahora.** Se revisó el fork "beta" del proyecto en busca de utilidades que este repo todavía no tenía, se portaron una por una (evitando duplicar nombres ya existentes) y se hizo una auditoría de código de punta a punta — no solo del README.
 
 ### 🔧 Mantenimiento y correcciones
 - **`messages-send.js`** — se corrigió un caso donde el nodo `biz` (usado por los botones nativos) podía duplicarse dentro del stanza si ya venía agregado por otra parte del mensaje; ahora se verifica que no exista antes de agregarlo.
 - **Auditoría completa de `lib/`**, archivo por archivo contra el fork beta: no faltaba ninguna función real, solo faltaban algunos exports y tipos, ya corregidos.
-- **Exports arreglados** — `Utils/reporting-utils.js` y `Utils/companion-reg-client-utils.js` existían en el código pero no se exportaban bien desde el paquete; quien instalaba `@baileys/baileys` no podía importar sus funciones. Ya se puede.
+- **Exports arreglados** — `Utils/reporting-utils.js` y `Utils/companion-reg-client-utils.js` existían en el código pero no se exportaban bien desde el paquete; quien instalaba `@fer2809fl/baileys` no podía importar sus funciones. Ya se puede.
 - **Tipos de TypeScript agregados** para los 9 módulos que solo venían en JavaScript — `anti-ban`, `smart-reconnect`, `message-queue`, `enhanced-cache`, `enhanced-logger`, `bot-utils`, `banner`, `rich-message-utils` y `use-sqlite-auth-state` — verificados con `tsc`. Ahora tienen autocompletado y chequeo de tipos.
 - **Limpieza de marca** en `banner.js` y `enhanced-logger.js` (traían branding del proyecto original de donde se portó el código).
 - En general: se optimizó y se prolijaron varios detalles sueltos de código y documentación que quedaron de fusiones anteriores.
@@ -95,7 +108,7 @@ Próximas tandas (se irán agregando poco a poco): documentación de Grupos avan
 
 **Mensajes programados** (`Utils/scheduled-messages.js`)
 ```javascript
-import { startScheduler, scheduleMessage, recurringMessage } from '@baileys/baileys'
+import { startScheduler, scheduleMessage, recurringMessage } from '@fer2809fl/baileys'
 
 startScheduler(sock) // arranca el scheduler una vez tengas el sock conectado
 
@@ -117,7 +130,7 @@ También: `cancelScheduledMessage`, `deleteScheduledMessage`, `listScheduledMess
 
 **Auth state en SQLite** (`Utils/use-sqlite-auth-state.js`)
 ```javascript
-import { useSqliteAuthState } from '@baileys/baileys'
+import { useSqliteAuthState } from '@fer2809fl/baileys'
 const { state, saveCreds } = await useSqliteAuthState({ dbPath: './auth.db' })
 ```
 Requiere `better-sqlite3` (peer dependency opcional: `npm i better-sqlite3`).
@@ -134,7 +147,7 @@ Requiere `better-sqlite3` (peer dependency opcional: `npm i better-sqlite3`).
 ### 📌 Notas finales
 - Se revisó cuidadosamente cada función nueva contra el código ya existente para no pisar ni duplicar exports (por ejemplo, `BufferJSON` y los tipos de resaltado de código se reutilizan de los archivos que ya tenías, en vez de crear una segunda copia).
 - Las funciones marcadas arriba con ejemplo de código ya están 100% cableadas y listas para usar; el resto se documentará con más ejemplos en la próxima revisión.
-- Los archivos `anti-ban.js`, `smart-reconnect.js`, `message-queue.js`, `enhanced-cache.js`, `enhanced-logger.js`, `bot-utils.js`, `banner.js`, `rich-message-utils.js` y `use-sqlite-auth-state.js` se distribuyen por ahora solo en JavaScript; los tipos de TypeScript para estos módulos llegarán en una futura actualización.
+- Los módulos `anti-ban`, `smart-reconnect`, `message-queue`, `enhanced-cache`, `enhanced-logger`, `bot-utils`, `banner`, `rich-message-utils` y `use-sqlite-auth-state` ya incluyen sus tipos de TypeScript (`.d.ts`).
 
 ---
 
@@ -142,7 +155,7 @@ Requiere `better-sqlite3` (peer dependency opcional: `npm i better-sqlite3`).
 
 ꕤ Esta librería está basada en Baileys. No está afiliada ni aprobada oficialmente por WhatsApp.
 
-> **@baileys/baileys** y su desarrollador no se hacen responsables por el mal uso de esta librería.
+> **@fer2809fl/baileys** y su desarrollador no se hacen responsables por el mal uso de esta librería.
 > Úsala de forma responsable — nada de spam ni actividades maliciosas.
 
 ---
@@ -151,34 +164,34 @@ Requiere `better-sqlite3` (peer dependency opcional: `npm i better-sqlite3`).
 
 **Opción 1 — Desde npm (recomendado)**
 ```bash
-npm install @baileys/baileys
-yarn add @baileys/baileys
+npm install @fer2809fl/baileys
+yarn add @fer2809fl/baileys
 ```
 
 **Opción 2 — Desde GitHub directamente**
 ```bash
-npm install github:fernox/baileys
-yarn add github:fernox/baileys
+npm install github:Fer2809fl/Bail
+yarn add github:Fer2809fl/Bail
 ```
 
 **En tu package.json**
 ```json
 {
   "dependencies": {
-    "@baileys/baileys": "^1.0.0"
+    "@fer2809fl/baileys": "^7.0.8"
   }
 }
 ```
 
-Repositorio: [github.com/fernox/baileys](https://github.com/fernox/baileys)
-Paquete npm: [npmjs.com/package/@baileys/baileys](https://www.npmjs.com/package/@baileys/baileys)
+Repositorio: [github.com/Fer2809fl/Bail](https://github.com/Fer2809fl/Bail)
+Paquete npm: [npmjs.com/package/@fer2809fl/baileys](https://www.npmjs.com/package/@fer2809fl/baileys)
 
 ---
 
 ## ⚡ Inicio Rápido
 
 ```javascript
-const { makeWASocket, useMultiFileAuthState } = require('@baileys/baileys')
+import makeWASocket, { useMultiFileAuthState } from '@fer2809fl/baileys'
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('session-myfer')
@@ -244,7 +257,7 @@ await fer.sendUrlButton(
     jid,
     '🔗 *ENLACES IMPORTANTES*\n\nVisita nuestro repositorio oficial:',
     '🌐 Ver GitHub',                             // etiqueta del botón
-    'https://github.com/fernox/baileys'       // URL de destino
+    'https://github.com/Fer2809fl/Bail'       // URL de destino
 )
 ```
 
@@ -327,7 +340,7 @@ await fer.sendMixedButtons(
     jid,
     '🎯 *PANEL DE CONTROL*\n\nSelecciona una acción rápida:',
     [
-        { name: 'cta_url',    params: { display_text: '🌐 GitHub', url: 'https://github.com/fernox/baileys', merchant_url: 'https://github.com/fernox/baileys' } },
+        { name: 'cta_url',    params: { display_text: '🌐 GitHub', url: 'https://github.com/Fer2809fl/Bail', merchant_url: 'https://github.com/Fer2809fl/Bail' } },
         { name: 'cta_copy',   params: { display_text: '📋 Comando Inicio', copy_code: 'npm start' } },
         { name: 'quick_reply', params: { display_text: '📋 Ver Menú', id: 'menu' } }
     ]
@@ -461,7 +474,7 @@ Los botones especiales que van **solos** en el mensaje (`send_location`, `cta_ca
 await fer.sendLinkPreview(
     jid,
     '¡Mirá esto! 👀',
-    'https://github.com/fernox/baileys'
+    'https://github.com/Fer2809fl/Bail'
 )
 ```
 
@@ -470,7 +483,7 @@ Si el texto ya trae el link adentro, no hace falta pasarlo aparte:
 ```javascript
 await fer.sendLinkPreview(
     jid,
-    'Repo oficial: https://github.com/fernox/baileys'
+    'Repo oficial: https://github.com/Fer2809fl/Bail'
 )
 ```
 
@@ -500,7 +513,7 @@ let handler = async (m, { conn, usedPrefix }) => {
         await conn.sendUrlButton(m.chat,
             '🔗 *ENLACES IMPORTANTES*\n\nVisita nuestro repositorio oficial:',
             '🌐 Ver GitHub',
-            'https://github.com/fernox/baileys'
+            'https://github.com/Fer2809fl/Bail'
         )
     }
 
@@ -542,7 +555,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     else if (m.text === `${usedPrefix}boton6`) {
         await conn.sendLinkPreview(m.chat,
             '¡Mirá el repo! 👀',
-            'https://github.com/fernox/baileys'
+            'https://github.com/Fer2809fl/Bail'
         )
     }
 }
@@ -618,7 +631,7 @@ await sock.sendCodeBlockV2(jid, 'SELECT * FROM users;', quotedMsg, { language: '
 
 // Texto con links enriquecidos (embeds inline)
 await sock.sendLink(jid, 'Mira esto: ', [
-  { url: 'https://github.com/fernox/baileys', displayName: 'Repo en GitHub' }
+  { url: 'https://github.com/Fer2809fl/Bail', displayName: 'Repo en GitHub' }
 ], quotedMsg)
 
 // LaTeX (fórmulas)
@@ -720,6 +733,51 @@ await sock.sendMessage(canalJid, { text: 'Novedades de hoy 🎉' })
 
 ---
 
+## 📜 Historial de mensajes
+
+Pide al teléfono mensajes anteriores sin necesidad de volver a vincular el dispositivo.
+
+```javascript
+// 1) Más mensajes de UN chat (espera la respuesta, 30 s por defecto)
+const oldest = mensajeMasAntiguoQueTienes // WAMessage
+const res = await sock.fetchMessageHistoryAndWait(
+  50,                                   // cantidad (máx. recomendado: 50)
+  oldest.key,                           // key del mensaje más antiguo que ya tienes
+  oldest.messageTimestamp * 1000,       // timestamp en milisegundos
+  { timeoutMs: 45_000 }                 // opcional
+)
+console.log(res.messages.length, 'mensajes nuevos')
+
+// Versión sin espera: devuelve el requestId y recibes los datos por el evento
+const requestId = await sock.fetchMessageHistory(50, oldest.key, oldest.messageTimestamp * 1000)
+
+// 2) Historial COMPLETO bajo demanda
+await sock.fetchFullHistory({
+  historyDurationDays: 30,              // cuántos días hacia atrás
+  // historyFromTimestamp: 1730000000,  // o desde una fecha (segundos unix)
+})
+
+// 3) Reintentar un chunk que falló o llegó incompleto
+await sock.requestHistorySyncChunkRetry(syncType, chunkOrder, chunkNotificationId, /* regenerar */ false)
+```
+
+Los datos llegan por eventos:
+
+```javascript
+sock.ev.on('messaging-history.set', ({ chats, contacts, messages, statusMessages, pastParticipants, callLogRecords, chunkOrder, messageAccessStatus }) => {
+  console.log(`Chunk ${chunkOrder}: ${messages.length} mensajes, ${chats.length} chats`)
+})
+
+// Respuesta del teléfono a fetchFullHistory / requestHistorySyncChunkRetry
+sock.ev.on('history-sync.response', ({ type, requestId, responseCode, canRecover }) => {
+  if (canRecover) console.log('Se puede reintentar:', type, requestId, responseCode)
+})
+```
+
+> Requiere sesión autenticada y que el teléfono esté disponible. Además de los chats, se procesan los contactos incluidos en la sincronización (nombres y mapeo LID ↔ número).
+
+---
+
 ## ✨ Características
 
 ### General
@@ -729,6 +787,7 @@ await sock.sendMessage(canalJid, { text: 'Novedades de hoy 🎉' })
 - ⚡ **Botones con acción: recordatorio, ubicación y encuesta que responden solos** *(Actualización 1.0.0)*
 - 🧱 **Wrappers de Native Flow: send_location, cta_reminder, webview, catálogo y más** *(Actualización 1.0.0)*
 - 🖼️ **Previsualización automática de links en botones y mensajes** *(Actualización 1.0.0)*
+- 📜 **Historial de mensajes bajo demanda (por chat o completo)** *(7.0.8)*
 - 👥 Soporte para grupos y chats privados
 
 ### Técnicas
@@ -744,5 +803,5 @@ await sock.sendMessage(canalJid, { text: 'Novedades de hoy 🎉' })
 
 ## 📖 Enlaces
 
-- Repositorio: [https://github.com/fernox/baileys](https://github.com/fernox/baileys)
-- Paquete npm: [https://www.npmjs.com/package/@baileys/baileys](https://www.npmjs.com/package/@baileys/baileys)
+- Repositorio: [https://github.com/Fer2809fl/Bail](https://github.com/Fer2809fl/Bail)
+- Paquete npm: [https://www.npmjs.com/package/@fer2809fl/baileys](https://www.npmjs.com/package/@fer2809fl/baileys)
