@@ -14,10 +14,12 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*",
-    "WAProto/**/*"
+    "WAProto/**/*",
+    "scripts/check-dist.js"
   ],
   "scripts": {
-    "build": "node -e \"const{execSync:e}=require('child_process');try{e('npx tsc -P tsconfig.build.json',{stdio:'inherit'})}catch(x){};e('npx tsc-esm-fix --tsconfig=tsconfig.build.json --ext=.js',{stdio:'inherit'})\""
+    "build": "npm run check",
+    "check": "node scripts/check-dist.js"
   },
   "keywords": [
     "baileys",

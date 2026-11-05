@@ -1,4 +1,8 @@
-## Historial de mensajes (nuevo sistema)
+# Changelog
+
+## 7.0.8
+
+### Historial de mensajes (nuevo sistema)
 - `fetchMessageHistory(count, key, ts, { accountLid, supportInlineResponse })`: opciones nuevas + validacion de argumentos.
 - `fetchMessageHistoryAndWait(...)`: pide historial y espera la respuesta (`timeoutMs`, 30s por defecto).
 - `fetchFullHistory({ historyFromTimestamp, historyDurationDays })`: historial completo bajo demanda.
@@ -7,7 +11,7 @@
 - Nuevo evento `history-sync.response`: respuesta del telefono a `fetchFullHistory` y `requestHistorySyncChunkRetry` (`responseCode`, `canRecover`).
 - Se procesan `NON_BLOCKING_DATA` / `INITIAL_STATUS_V3` e `inlineContacts` (nombres + mapeo LID-PN).
 
-## Arreglos
+### Arreglos
 - `MessageQueue`: la huella anti-duplicados solo miraba los primeros bytes del JSON, asi que mensajes DISTINTOS al mismo chat se descartaban como duplicados; ahora usa sha1 completo y las tareas-funcion sin `contentHash` ya no se deduplican entre si.
 - `MessageQueue`: al llenarse la cola se reordenaba al reves (rompia el orden de prioridad); ahora solo se recorta lo de menor prioridad al final.
 - `EnhancedCache`: el archivo de persistencia crecia sin limite (mezclaba claves viejas) y se escribia sin proteccion; ahora guarda solo lo vivo (acotado por `MAX_SIZE`), de forma atomica y sin solapar guardados.
@@ -15,7 +19,12 @@
 - Temporizadores de anti-ban, health check, cola, cache y programados con `unref()`: ya no impiden que el proceso termine.
 - `fetchLatestBaileysVersion`: ya no depende de la linea 7 del archivo remoto; busca `const version = [...]` en todo el texto.
 
-# Changelog
+### Mantenimiento adicional
+- `downloadHistory`: procesa el flujo comprimido mediante `pipeline` e `inflate`, evitando conservar primero todo el flujo comprimido en memoria.
+- `fetchMessageHistoryAndWait`: espera directamente los eventos, limpia el temporizador al recibir respuesta y valida `timeoutMs`; elimina el sondeo periódico y sus temporizadores residuales.
+- `fetchLatestBaileysVersion`: el valor de respaldo ahora coincide con la versión configurada en `Defaults` (`2.3000.1047406223`).
+- `npm run build` valida todos los archivos JavaScript de `lib/` y ya no intenta compilar desde un `tsconfig.build.json` inexistente ni silencia errores.
+- README: enlaces corregidos para apuntar al repositorio `Fer2809fl/baileys`.
 
 ## 7.0.7
 

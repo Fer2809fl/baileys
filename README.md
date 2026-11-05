@@ -1,11 +1,11 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Fer2809fl/Bail/refs/heads/main/lib/Baileys.jpeg" alt="Baileys" width="500" style="border-radius: 20px;"/>
+<img src="https://raw.githubusercontent.com/Fer2809fl/baileys/refs/heads/main/lib/Baileys.jpeg" alt="Baileys" width="500" style="border-radius: 20px;"/>
 
 # Baileys
 ### API de WhatsApp Web para Node.js
 
-[![version](https://img.shields.io/badge/version-7.0.8-blueviolet)](https://github.com/Fer2809fl/Bail/releases)
+[![version](https://img.shields.io/badge/version-7.0.8-blueviolet)](https://github.com/Fer2809fl/baileys/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-supported-blue)](https://www.typescriptlang.org)
@@ -183,11 +183,18 @@ yarn add github:Fer2809fl/Bail
 }
 ```
 
-Repositorio: [github.com/Fer2809fl/Bail](https://github.com/Fer2809fl/Bail)
+Repositorio: [github.com/Fer2809fl/Bail](https://github.com/Fer2809fl/baileys)
 Paquete npm: [npmjs.com/package/@fer2809fl/baileys](https://www.npmjs.com/package/@fer2809fl/baileys)
 
 ---
 
+## 🧪 Validar la distribución
+
+Este repositorio publica la distribución JavaScript ya preparada en `lib/` y sus declaraciones TypeScript (`.d.ts`); no incluye el árbol de fuentes `src/` ni `tsconfig.build.json`. Por eso `npm run build` valida la sintaxis de todos los archivos JavaScript distribuidos con la versión de Node instalada, en lugar de fingir una compilación TypeScript.
+
+Después de modificar el código de `lib/`, ejecuta `npm run build`. El proceso ahora falla de inmediato si encuentra un archivo JavaScript inválido; ya no oculta errores del compilador ni depende de un archivo de configuración inexistente.
+
+---
 ## ⚡ Inicio Rápido
 
 ```javascript
@@ -257,7 +264,7 @@ await fer.sendUrlButton(
     jid,
     '🔗 *ENLACES IMPORTANTES*\n\nVisita nuestro repositorio oficial:',
     '🌐 Ver GitHub',                             // etiqueta del botón
-    'https://github.com/Fer2809fl/Bail'       // URL de destino
+    'https://github.com/Fer2809fl/baileys'       // URL de destino
 )
 ```
 
@@ -340,7 +347,7 @@ await fer.sendMixedButtons(
     jid,
     '🎯 *PANEL DE CONTROL*\n\nSelecciona una acción rápida:',
     [
-        { name: 'cta_url',    params: { display_text: '🌐 GitHub', url: 'https://github.com/Fer2809fl/Bail', merchant_url: 'https://github.com/Fer2809fl/Bail' } },
+        { name: 'cta_url',    params: { display_text: '🌐 GitHub', url: 'https://github.com/Fer2809fl/baileys', merchant_url: 'https://github.com/Fer2809fl/baileys' } },
         { name: 'cta_copy',   params: { display_text: '📋 Comando Inicio', copy_code: 'npm start' } },
         { name: 'quick_reply', params: { display_text: '📋 Ver Menú', id: 'menu' } }
     ]
@@ -474,7 +481,7 @@ Los botones especiales que van **solos** en el mensaje (`send_location`, `cta_ca
 await fer.sendLinkPreview(
     jid,
     '¡Mirá esto! 👀',
-    'https://github.com/Fer2809fl/Bail'
+    'https://github.com/Fer2809fl/baileys'
 )
 ```
 
@@ -483,7 +490,7 @@ Si el texto ya trae el link adentro, no hace falta pasarlo aparte:
 ```javascript
 await fer.sendLinkPreview(
     jid,
-    'Repo oficial: https://github.com/Fer2809fl/Bail'
+    'Repo oficial: https://github.com/Fer2809fl/baileys'
 )
 ```
 
@@ -513,7 +520,7 @@ let handler = async (m, { conn, usedPrefix }) => {
         await conn.sendUrlButton(m.chat,
             '🔗 *ENLACES IMPORTANTES*\n\nVisita nuestro repositorio oficial:',
             '🌐 Ver GitHub',
-            'https://github.com/Fer2809fl/Bail'
+            'https://github.com/Fer2809fl/baileys'
         )
     }
 
@@ -555,7 +562,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     else if (m.text === `${usedPrefix}boton6`) {
         await conn.sendLinkPreview(m.chat,
             '¡Mirá el repo! 👀',
-            'https://github.com/Fer2809fl/Bail'
+            'https://github.com/Fer2809fl/baileys'
         )
     }
 }
@@ -631,7 +638,7 @@ await sock.sendCodeBlockV2(jid, 'SELECT * FROM users;', quotedMsg, { language: '
 
 // Texto con links enriquecidos (embeds inline)
 await sock.sendLink(jid, 'Mira esto: ', [
-  { url: 'https://github.com/Fer2809fl/Bail', displayName: 'Repo en GitHub' }
+  { url: 'https://github.com/Fer2809fl/baileys', displayName: 'Repo en GitHub' }
 ], quotedMsg)
 
 // LaTeX (fórmulas)
@@ -803,5 +810,5 @@ sock.ev.on('history-sync.response', ({ type, requestId, responseCode, canRecover
 
 ## 📖 Enlaces
 
-- Repositorio: [https://github.com/Fer2809fl/Bail](https://github.com/Fer2809fl/Bail)
+- Repositorio: [https://github.com/Fer2809fl/baileys](https://github.com/Fer2809fl/baileys)
 - Paquete npm: [https://www.npmjs.com/package/@fer2809fl/baileys](https://www.npmjs.com/package/@fer2809fl/baileys)
