@@ -41,7 +41,7 @@
 - 💾 **Persistencia segura:** los JSON de `database/` se escriben de forma atómica y se guardan al cerrar el proceso, así no se corrompen.
 - ✅ **Validación al enviar:** URL, teléfono, listas, botones vacíos e ids repetidos fallan con un error claro en español.
 - 🧾 `listReminders()` devuelve copias ordenadas por fecha.
-- 🧩 Un solo comando de ejemplo, [`examples/Ibtn.ts`](examples/Ibtn.ts), con 3 modos: `ibtn` (acciones), `ibtn native` y `ibtn recordatorios` (ver y cancelar tus recordatorios).
+- 🧩 Las funciones de botones con acción incluyen recordatorios, ubicación y encuestas; consulta sus métodos y opciones en las secciones de esta documentación.
 
 Detalle completo en el [CHANGELOG](CHANGELOG.md).
 
@@ -432,7 +432,7 @@ await fer.sendActionButtons(jid, '🎛️ *PANEL*', [
 - **Cooldown:** mismo usuario + mismo botón = 1 toque cada 1,5 s.
 - **Recordatorios:** máximo 20 pendientes por usuario; solo su dueño puede cancelarlos.
 - **Expiración / un solo uso:** si el botón ya expiró (`actionTtl`) o ya se gastó (`actionOnce`), el bot avisa en vez de quedarse callado.
-- **Cancelar desde código:** `{ type: 'cancel_reminder', reminderId }` se puede usar como `action` y es persistente (ver `ibtn recordatorios` en `examples/Ibtn.ts`).
+- **Cancelar desde código:** `{ type: 'cancel_reminder', reminderId }` se puede usar como `action` y es persistente (consulta la sección de recordatorios con acción en este README).
 
 ### 🔎 `parseButtonResponse` — Leer cualquier respuesta de botón
 
@@ -473,6 +473,94 @@ Los botones especiales que van **solos** en el mensaje (`send_location`, `cta_ca
 
 ---
 
+## 🪪 Tarjetas de vista previa sin URL (External Ad Reply) — v7.0.8
+
+Puedes enviar una tarjeta con miniatura local, título y descripción **sin publicar ni mostrar un enlace**. La miniatura se pasa como `Buffer` o `Uint8Array`; no necesitas subirla a un servidor.
+
+### Envío directo (recomendado)
+
+```javascript
+import { readFileSync } from 'node:fs'
+import { sendExternalAdReply } from '@fer2809fl/baileys'
+
+const thumbnail = readFileSync('./media/portada.jpg')
+
+await sendExternalAdReply(
+  sock,
+  jid,
+  'Texto que acompaña la tarjeta',
+  {
+    title: 'Nombre del canal o contenido',
+    body: 'Descripción que aparece debajo del título',
+    thumbnail,
+    mediaType: 1,                 // 1 = imagen
+    renderLargerThumbnail: true,  // true = grande; false = compacta
+    showAdAttribution: false      // true solicita la etiqueta de atribución
+  }
+)
+```
+
+### Tarjeta compacta o grande
+
+Cambia solamente `renderLargerThumbnail`:
+
+```javascript
+// Miniatura grande
+await sendExternalAdReply(sock, jid, 'Mira esta imagen', {
+  title: 'Vista grande',
+  thumbnail,
+  renderLargerThumbnail: true
+})
+
+// Miniatura compacta
+await sendExternalAdReply(sock, jid, 'Mira esta imagen', {
+  title: 'Vista compacta',
+  thumbnail,
+  renderLargerThumbnail: false
+})
+```
+
+### Construir el objeto sin enviarlo
+
+```javascript
+import {
+  makeExternalAdReply,
+  makeExternalAdReplyMessage
+} from '@fer2809fl/baileys'
+
+const externalAdReply = makeExternalAdReply({
+  title: 'Mi contenido',
+  body: 'Descripción',
+  thumbnail,
+  renderLargerThumbnail: true
+})
+
+// Mensaje extendido listo para integrarlo en tu flujo
+const message = makeExternalAdReplyMessage('Texto del mensaje', {
+  title: 'Mi contenido',
+  body: 'Descripción',
+  thumbnail
+})
+```
+
+### Opciones disponibles
+
+| Opción | Descripción |
+|---|---|
+| `title` | Título de la tarjeta. |
+| `body` | Descripción. |
+| `thumbnail` | Imagen local como `Buffer` o `Uint8Array`. |
+| `sourceUrl` | Enlace de origen opcional; omítelo para no incluir URL. |
+| `mediaUrl` | URL opcional del medio. |
+| `mediaType` | `0` ninguno, `1` imagen, `2` vídeo. |
+| `renderLargerThumbnail` | `true` miniatura grande; `false` compacta. |
+| `showAdAttribution` | Solicita la etiqueta de atribución compatible. |
+| `containsAutoReply` | Indica si contiene una respuesta automática. |
+
+**Importante:** la etiqueta de atribución no es una insignia de verificación. La insignia oficial de WhatsApp/Meta la controla WhatsApp; esta librería no puede crear ni falsificarla. La apariencia final de la tarjeta también depende de la versión y del cliente de WhatsApp.
+
+---
+
 ## 🖼️ Previsualización de Links *(Actualización 1.0.0)*
 
 `sendLinkPreview` manda solo texto + una tarjeta grande y prolija con la imagen, título y descripción de cualquier URL — igual que un mensaje normal de WhatsApp con link, pero forzando `renderLargerThumbnail` para que se vea mejor. Sirve para links a fotos, artículos, redes sociales, lo que sea.
@@ -502,7 +590,7 @@ await fer.sendUrlButton(jid, texto, '🌐 Ver más', url, { preview: false })
 
 ---
 
-### Plugin de ejemplo completo
+### Integración de botones en tu plugin
 
 ```javascript
 // plugins/botones.js
