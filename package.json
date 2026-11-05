@@ -14,13 +14,8 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*",
-    "WAProto/**/*",
-    "scripts/check-dist.js"
+    "WAProto/**/*"
   ],
-  "scripts": {
-    "build": "npm run check",
-    "check": "node scripts/check-dist.js"
-  },
   "keywords": [
     "baileys",
     "whatsapp",
