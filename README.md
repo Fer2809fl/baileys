@@ -192,11 +192,21 @@ Paquete npm: [npmjs.com/package/@fer2809fl/baileys](https://www.npmjs.com/packag
 
 La extracción de miniaturas de video usa argumentos separados para FFmpeg y valida los parámetros recibidos. La descarga del historial limita a 100 MB los datos descomprimidos para evitar consumos excesivos de memoria. SQLite valida las opciones de conexión, aplica un tiempo de espera para bloqueos y conserva las escrituras de claves dentro de una transacción.
 
-## 🧪 Validar la distribución
+## Validar la distribución
 
-Este repositorio publica la distribución JavaScript ya preparada en `lib/` y sus declaraciones TypeScript (`.d.ts`); no incluye el árbol de fuentes `src/` ni `tsconfig.build.json`. Por eso `npm run build` valida la sintaxis de todos los archivos JavaScript distribuidos con la versión de Node instalada, en lugar de fingir una compilación TypeScript.
+El repositorio publica JavaScript ya preparado en `lib/` junto con sus declaraciones TypeScript (`.d.ts`). No incluye fuentes TypeScript ni un proceso de compilación. No se declara un comando `build` ficticio ni se referencia un script externo que no forme parte del paquete.
 
-Después de modificar el código de `lib/`, ejecuta `npm run build`. El proceso ahora falla de inmediato si encuentra un archivo JavaScript inválido; ya no oculta errores del compilador ni depende de un archivo de configuración inexistente.
+Para comprobar los archivos incluidos en el paquete antes de publicarlo, ejecuta:
+
+```bash
+npm pack --dry-run
+```
+
+Para comprobar la sintaxis del punto de entrada con tu versión de Node.js:
+
+```bash
+node --check lib/index.js
+```
 
 ---
 ## ⚡ Inicio Rápido
