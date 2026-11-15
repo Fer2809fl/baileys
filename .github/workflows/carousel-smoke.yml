@@ -1,5 +1,7 @@
 name: Baileys runtime smoke tests
 on:
+  push:
+    branches: [feature/carousel-validation]
   pull_request:
     branches: [main]
   workflow_dispatch:
