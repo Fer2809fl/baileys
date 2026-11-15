@@ -18,8 +18,12 @@ export declare class ButtonV2 {
     constructor(...args: any[]);
 }
 export declare class Carousel {
+    static readonly MAX_CARDS: 10;
     [key: string]: any;
-    constructor(...args: any[]);
+    constructor(client: WASocket);
+    addCard(card: Record<string, any> | Record<string, any>[]): this;
+    build(jid: string, options?: Record<string, any>): Promise<import("../WAProto/index.js").WAMessage>;
+    send(jid: string, options?: Record<string, any>): Promise<import("../WAProto/index.js").WAMessage>;
 }
 export declare class AIRich {
     [key: string]: any;
