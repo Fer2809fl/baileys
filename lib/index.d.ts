@@ -22,7 +22,7 @@ export declare class Carousel {
     [key: string]: any;
     constructor(client: WASocket);
     addCard(card: Record<string, any> | Record<string, any>[]): this;
-    build(jid: string, options?: Record<string, any>): Promise<import("../WAProto/index.js").WAMessage>;
+    build(jid: string, options?: Record<string, any>): Promise<any>;
     send(jid: string, options?: Record<string, any>): Promise<import("../WAProto/index.js").WAMessage>;
 }
 export declare class AIRich {
