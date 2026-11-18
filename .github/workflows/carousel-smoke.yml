@@ -1,0 +1,35 @@
+name: Baileys runtime smoke tests
+on:
+  push:
+    branches: [feature/carousel-validation]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - run: npm install --ignore-scripts --legacy-peer-deps
+      - name: Import package and test carousel validation
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { Carousel } from './lib/index.js';
+          const socket = { relayMessage: async () => undefined };
+          const card = () => ({ header: { hasMediaAttachment: true, imageMessage: { mimetype: 'image/jpeg' } } });
+          const carousel = new Carousel(socket);
+          assert.equal(carousel.addCard(card()), carousel);
+          const ten = new Carousel(socket);
+          ten.addCard(Array.from({ length: 10 }, card));
+          assert.throws(() => ten.addCard(card()), RangeError);
+          assert.throws(() => new Carousel(socket).addCard({ header: { hasMediaAttachment: true } }), TypeError);
+          await assert.rejects(() => new Carousel(socket).build('123@s.whatsapp.net'), /at least one card/);
+          console.log('Carousel smoke tests passed');
+          NODE
