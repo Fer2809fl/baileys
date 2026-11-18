@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { Agent } from 'node:https';
+import { writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { getWAUploadToServer } from '../lib/Utils/messages-media.js';
 import { proto } from '../WAProto/index.js';
 import processMessage from '../lib/Utils/process-message.js';
 import { decodeMessageNode } from '../lib/Utils/decode-wa-message.js';
@@ -162,5 +167,58 @@ await processMessage({
 }, processContext);
 assert.equal(protocolEvents.length, 1);
 assert.equal(protocolEvents[0].event, 'messages.update');
+
+
+const uploadPath = join(tmpdir(), `baileys-dispatcher-smoke-${process.pid}-${Date.now()}.bin`);
+const originalFetchForUpload = globalThis.fetch;
+const originalBunDescriptor = Object.getOwnPropertyDescriptor(process.versions, 'bun');
+let uploadFetchInit;
+await writeFile(uploadPath, Buffer.from('baileys upload smoke test'));
+Object.defineProperty(process.versions, 'bun', {
+  value: 'test-runtime',
+  configurable: true
+});
+globalThis.fetch = async (_url, init) => {
+  uploadFetchInit = init;
+  if (init?.body) {
+    await new Response(init.body).text();
+  }
+  return new Response(JSON.stringify({
+    url: 'https://example.com/media',
+    direct_path: '/media'
+  }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+};
+
+try {
+  const mediaConn = {
+    auth: 'auth-token',
+    ttl: 60,
+    hosts: [{ hostname: 'upload.example.com', maxContentLengthBytes: 1024 }],
+    fetchDate: new Date()
+  };
+  const upload = getWAUploadToServer({
+    customUploadHosts: [],
+    fetchAgent: new Agent(),
+    logger: { debug: () => undefined, warn: () => undefined, error: () => undefined },
+    options: {}
+  }, async () => mediaConn);
+  const uploadResult = await upload(uploadPath, {
+    fileEncSha256B64: 'abc123',
+    mediaType: 'image'
+  });
+  assert.equal(uploadResult.mediaUrl, 'https://example.com/media');
+  assert.equal(uploadResult.directPath, '/media');
+  assert.equal(uploadFetchInit?.dispatcher, undefined);
+} finally {
+  globalThis.fetch = originalFetchForUpload;
+  if (originalBunDescriptor) {
+    Object.defineProperty(process.versions, 'bun', originalBunDescriptor);
+  } else {
+    delete process.versions.bun;
+  }
+  await rm(uploadPath, { force: true });
+}
 
 console.log('Runtime smoke tests passed');
