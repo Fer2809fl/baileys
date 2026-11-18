@@ -84,8 +84,9 @@ export type MediaDownloadOptions = {
     startByte?: number;
     endByte?: number;
     options?: RequestInit;
+    host?: string;
 };
-export declare const getUrlFromDirectPath: (directPath: string) => string;
+export declare const getUrlFromDirectPath: (directPath: string, host?: string) => string;
 export declare const downloadContentFromMessage: ({ mediaKey, directPath, url }: DownloadableMessage, type: MediaType, opts?: MediaDownloadOptions) => Promise<any>;
 /**
  * Decrypts and downloads an AES256-CBC encrypted file given the keys.
