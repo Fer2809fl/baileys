@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { proto } from '../WAProto/index.js';
+import processMessage from '../lib/Utils/process-message.js';
+import { decodeMessageNode } from '../lib/Utils/decode-wa-message.js';
 import { Carousel, downloadContentFromMessage } from '../lib/index.js';
 
 const socket = { relayMessage: async () => undefined };
@@ -69,5 +72,95 @@ try {
 } finally {
   globalThis.fetch = originalFetch;
 }
+
+
+const ownJid = '5210000000000@s.whatsapp.net';
+const ownLid = '5210000000000@lid';
+const decodedOwnPn = decodeMessageNode({
+  tag: 'message',
+  attrs: { id: 'self-pn', from: ownJid, t: '1' },
+  content: []
+}, ownJid, ownLid);
+assert.equal(decodedOwnPn.fullMessage.key.fromMe, true);
+
+const decodedOwnLid = decodeMessageNode({
+  tag: 'message',
+  attrs: { id: 'self-lid', from: ownLid, t: '1' },
+  content: []
+}, ownJid, ownLid);
+assert.equal(decodedOwnLid.fullMessage.key.fromMe, true);
+
+const protocolEvents = [];
+const securityWarnings = [];
+const processContext = {
+  shouldProcessHistoryMsg: false,
+  ev: {
+    emit: (event, payload) => protocolEvents.push({ event, payload })
+  },
+  creds: { me: { id: ownJid }, accountSettings: {} },
+  signalRepository: {},
+  keyStore: {},
+  logger: {
+    info: () => undefined,
+    debug: () => undefined,
+    warn: (...args) => securityWarnings.push(args)
+  },
+  options: {},
+  getMessage: async () => undefined
+};
+
+const selfOnlyTypes = [
+  proto.Message.ProtocolMessage.Type.HISTORY_SYNC_NOTIFICATION,
+  proto.Message.ProtocolMessage.Type.APP_STATE_SYNC_KEY_SHARE,
+  proto.Message.ProtocolMessage.Type.LID_MIGRATION_MAPPING_SYNC,
+  proto.Message.ProtocolMessage.Type.PEER_DATA_OPERATION_REQUEST_RESPONSE_MESSAGE
+];
+
+for (const type of selfOnlyTypes) {
+  await processMessage({
+    key: {
+      remoteJid: '5211111111111@s.whatsapp.net',
+      fromMe: false,
+      id: `spoofed-${type}`
+    },
+    message: { protocolMessage: { type } },
+    messageTimestamp: 1
+  }, processContext);
+}
+
+assert.equal(protocolEvents.length, 0);
+assert.equal(securityWarnings.length, selfOnlyTypes.length);
+
+await processMessage({
+  key: {
+    remoteJid: ownJid,
+    fromMe: true,
+    id: 'valid-self-history'
+  },
+  message: {
+    protocolMessage: {
+      type: proto.Message.ProtocolMessage.Type.HISTORY_SYNC_NOTIFICATION
+    }
+  },
+  messageTimestamp: 1
+}, processContext);
+assert.equal(securityWarnings.length, selfOnlyTypes.length);
+
+await processMessage({
+  key: {
+    remoteJid: '5211111111111@s.whatsapp.net',
+    fromMe: false,
+    id: 'valid-revoke'
+  },
+  message: {
+    protocolMessage: {
+      type: proto.Message.ProtocolMessage.Type.REVOKE,
+      key: { id: 'message-to-revoke' }
+    }
+  },
+  messageTimestamp: 1
+}, processContext);
+assert.equal(protocolEvents.length, 1);
+assert.equal(protocolEvents[0].event, 'messages.update');
 
 console.log('Runtime smoke tests passed');
