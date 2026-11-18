@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          package-manager-cache: false
       - run: npm install --ignore-scripts --legacy-peer-deps
       - name: Import package and test carousel validation
         run: |
