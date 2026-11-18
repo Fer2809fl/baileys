@@ -1,7 +1,7 @@
 name: Baileys runtime smoke tests
 on:
   push:
-    branches: [feature/carousel-validation]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -10,18 +10,25 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           package-manager-cache: false
       - run: npm install --ignore-scripts --legacy-peer-deps
-      - name: Import package and test carousel validation
+      - name: TypeScript public API check
+        run: npx tsc --noEmit --skipLibCheck --module NodeNext --moduleResolution NodeNext --target ES2022 --types node type-tests/public-api.ts
+      - name: Import package and test runtime behavior
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
-          import { Carousel } from './lib/index.js';
+          import { randomBytes } from 'node:crypto';
+          import { Carousel, downloadContentFromMessage } from './lib/index.js';
           const socket = { relayMessage: async () => undefined };
           const card = () => ({ header: { hasMediaAttachment: true, imageMessage: { mimetype: 'image/jpeg' } } });
           const carousel = new Carousel(socket);
@@ -31,5 +38,44 @@ jobs:
           assert.throws(() => ten.addCard(card()), RangeError);
           assert.throws(() => new Carousel(socket).addCard({ header: { hasMediaAttachment: true } }), TypeError);
           await assert.rejects(() => new Carousel(socket).build('123@s.whatsapp.net'), /at least one card/);
-          console.log('Carousel smoke tests passed');
+          const directPath = '/v/t62.15575-24/123_456_n.enc?ccb=11-4&oh=abc&oe=def&_nc_sid=5e03e0';
+          const originalFetch = globalThis.fetch;
+          let requestedUrl;
+          globalThis.fetch = async (url) => {
+            requestedUrl = String(url);
+            throw new Error('stop-after-url-capture');
+          };
+          try {
+            await assert.rejects(
+              () => downloadContentFromMessage({
+                mediaKey: randomBytes(32),
+                url: `https://a.whatsapp.net${directPath}&mms3=true`,
+                directPath
+              }, 'sticker'),
+              /stop-after-url-capture/
+            );
+            assert.equal(requestedUrl, `https://mmg.whatsapp.net${directPath}`);
+            requestedUrl = undefined;
+            await assert.rejects(
+              () => downloadContentFromMessage({
+                mediaKey: randomBytes(32),
+                url: `https://media-cdn-1.cdn.whatsapp.net${directPath}&mms3=true`,
+                directPath
+              }, 'sticker'),
+              /stop-after-url-capture/
+            );
+            assert.equal(requestedUrl, `https://media-cdn-1.cdn.whatsapp.net${directPath}`);
+            requestedUrl = undefined;
+            await assert.rejects(
+              () => downloadContentFromMessage({
+                mediaKey: randomBytes(32),
+                directPath
+              }, 'sticker'),
+              /stop-after-url-capture/
+            );
+            assert.equal(requestedUrl, `https://mmg.whatsapp.net${directPath}`);
+          } finally {
+            globalThis.fetch = originalFetch;
+          }
+          console.log('Runtime smoke tests passed');
           NODE
