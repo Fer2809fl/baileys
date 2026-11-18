@@ -81,5 +81,9 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit --skipLibCheck --module NodeNext --moduleResolution NodeNext --target ES2022 --types node type-tests/public-api.ts",
+    "test:smoke": "node type-tests/runtime-smoke.mjs"
   }
 }
