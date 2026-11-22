@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
+import { createCipheriv, randomBytes } from 'node:crypto';
+import { createServer } from 'node:http';
 import { Agent } from 'node:https';
 import { writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { getWAUploadToServer } from '../lib/Utils/messages-media.js';
+import { downloadEncryptedContent, getWAUploadToServer, toBuffer } from '../lib/Utils/messages-media.js';
 import { proto } from '../WAProto/index.js';
 import processMessage from '../lib/Utils/process-message.js';
 import { decodeMessageNode } from '../lib/Utils/decode-wa-message.js';
@@ -220,5 +221,65 @@ try {
   }
   await rm(uploadPath, { force: true });
 }
+
+
+const encryptMedia = (plaintext, cipherKey, iv) => {
+  const cipher = createCipheriv('aes-256-cbc', cipherKey, iv);
+  return Buffer.concat([cipher.update(plaintext), cipher.final()]);
+};
+
+const withMediaServer = async (handler, run) => {
+  const server = createServer(handler);
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', resolve);
+  });
+  const address = server.address();
+  if (!address || typeof address === 'string') {
+    throw new Error('Could not determine the media test server port');
+  }
+  try {
+    await run(`http://127.0.0.1:${address.port}/media`);
+  } finally {
+    server.closeAllConnections();
+    await new Promise(resolve => server.close(() => resolve()));
+  }
+};
+
+const mediaCipherKey = randomBytes(32);
+const mediaIv = randomBytes(16);
+const completePlaintext = randomBytes(64 * 1024);
+const completeCiphertext = encryptMedia(completePlaintext, mediaCipherKey, mediaIv);
+
+await withMediaServer((_req, res) => {
+  res.writeHead(200, { 'Content-Length': completeCiphertext.length });
+  res.end(completeCiphertext);
+}, async url => {
+  const stream = await downloadEncryptedContent(url, {
+    cipherKey: mediaCipherKey,
+    iv: mediaIv
+  });
+  assert.deepEqual(await toBuffer(stream), completePlaintext);
+});
+
+const interruptedCiphertext = encryptMedia(
+  randomBytes(256 * 1024),
+  mediaCipherKey,
+  mediaIv
+);
+
+await withMediaServer((req, res) => {
+  res.writeHead(200, { 'Content-Length': interruptedCiphertext.length });
+  res.write(interruptedCiphertext.subarray(0, 64 * 1024), () => req.socket.destroy());
+}, async url => {
+  const stream = await downloadEncryptedContent(url, {
+    cipherKey: mediaCipherKey,
+    iv: mediaIv
+  });
+  await assert.rejects(
+    () => toBuffer(stream),
+    /terminated|aborted|other side closed|fetch failed/i
+  );
+});
 
 console.log('Runtime smoke tests passed');
