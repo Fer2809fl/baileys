@@ -1,5 +1,6 @@
 import { Carousel, downloadContentFromMessage, getUrlFromDirectPath } from '../lib/index.js';
 import type { WASocket } from '../lib/index.js';
+import type { SignalKeyStoreWithTransaction } from '../lib/Types/Auth.js';
 import type { MediaDownloadOptions } from '../lib/Utils/messages-media.js';
 
 declare const socket: WASocket;
@@ -18,6 +19,9 @@ const mediaOptions: MediaDownloadOptions = {
 };
 
 const mediaUrl: string = getUrlFromDirectPath('/media/path', mediaOptions.host);
+
+declare const transactionKeys: SignalKeyStoreWithTransaction;
+transactionKeys.disposeTransactionStorage?.();
 
 void mediaUrl;
 void downloadContentFromMessage(

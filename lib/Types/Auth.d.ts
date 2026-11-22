@@ -99,6 +99,7 @@ export type SignalKeyStore = {
 export type SignalKeyStoreWithTransaction = SignalKeyStore & {
     isInTransaction: () => boolean;
     transaction<T>(exec: () => Promise<T>, key: string): Promise<T>;
+    disposeTransactionStorage?(): void;
 };
 export type TransactionCapabilityOptions = {
     maxCommitRetries: number;
