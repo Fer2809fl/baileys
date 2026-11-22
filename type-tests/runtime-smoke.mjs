@@ -5,6 +5,7 @@ import { Agent } from 'node:https';
 import { writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { addTransactionCapability } from '../lib/Utils/auth-utils.js';
 import { downloadEncryptedContent, getWAUploadToServer, toBuffer } from '../lib/Utils/messages-media.js';
 import { proto } from '../WAProto/index.js';
 import processMessage from '../lib/Utils/process-message.js';
@@ -281,5 +282,29 @@ await withMediaServer((req, res) => {
     /terminated|aborted|other side closed|fetch failed/i
   );
 });
+
+
+const transactionLogger = {
+  trace: () => undefined,
+  warn: () => undefined,
+  error: () => undefined
+};
+const transactionKeys = addTransactionCapability({
+  get: async () => ({}),
+  set: async () => undefined
+}, transactionLogger, {
+  maxCommitRetries: 1,
+  delayBetweenTriesMs: 0
+});
+assert.equal(typeof transactionKeys.disposeTransactionStorage, 'function');
+assert.equal(
+  await transactionKeys.transaction(async () => 'before', 'smoke-before'),
+  'before'
+);
+transactionKeys.disposeTransactionStorage();
+assert.equal(
+  await transactionKeys.transaction(async () => 'after', 'smoke-after'),
+  'after'
+);
 
 console.log('Runtime smoke tests passed');
